@@ -1,0 +1,355 @@
+Name,Value,Date,Account,Category,Subcategory
+Restau Fisica,25.3,12/09/2019,BB,Food,Eat out
+Bilhete Unico,30.1,15/09/2019,Parents,Transport,Public transport
+Bandeco,50,15/09/2019,Cash,Food,Eat out
+Impressao apostila,35,24/09/2019,Cash,Study,Documents
+Taxa BB,13.25,25/09/2019,BB,Taxes,Transaction
+Agua,72.33333333,30/09/2019,Parents,Home,Water
+Cafe,75,30/09/2019,Parents,Food,Home meal
+Luz,138.6666667,30/09/2019,Parents,Home,Electricity
+Mercado,150,30/09/2019,Parents,Food,Mercado
+Internet,191.3333333,30/09/2019,Parents,Home,Internet
+Refeicoes compradas ate criacao,270,30/09/2019,Parents,Food,Home meal
+Refeicoes em casa ate criacao,390,30/09/2019,Parents,Food,Home meal
+Carro,1000,30/09/2019,Parents,Transport,Car
+TED,2.64,01/10/2019,BB,Taxes,Transaction
+Cookie,3.5,10/10/2019,Nu,Food,Snack
+Korean,62.7,11/10/2019,Nu,Food,Extra
+Oazi,21.14,16/10/2019,Nu,Food,Eat out
+Oazi,24.98,18/10/2019,Nu,Food,Eat out
+Oazi,32.07,23/10/2019,Nu,Food,Eat out
+Oazi,25.13,25/10/2019,Nu,Food,Eat out
+IVVB,0.4,30/10/2019,Easy,Taxes,Buy tax
+Oazi,24.09,30/10/2019,Nu,Food,Eat out
+Agua,72.33333333,31/10/2019,Parents,Home,Water
+Cafe,75,31/10/2019,Parents,Food,Home meal
+Luz,138.6666667,31/10/2019,Parents,Home,Electricity
+Mercado,150,31/10/2019,Parents,Food,Mercado
+Internet,191.3333333,31/10/2019,Parents,Home,Internet
+Refeicoes fora,297,31/10/2019,Parents,Food,Eat out
+Refeicoes em casa,450,31/10/2019,Parents,Food,Home meal
+Carro,1000,31/10/2019,Parents,Transport,Car
+Oazi,27.93,01/11/2019,Nu,Food,Eat out
+Oazi,31.78,06/11/2019,Alelo,Food,Eat out
+Oazi,30.3,08/11/2019,Alelo,Food,Eat out
+Piscininha,20.64,13/11/2019,Alelo,Food,Eat out
+New taste kilo,23.9,19/11/2019,Alelo,Food,Eat out
+Oazi,28.53,22/11/2019,Alelo,Food,Eat out
+Piscininha,16.89,26/11/2019,Alelo,Food,Eat out
+Piscininha,13.78,27/11/2019,Alelo,Food,Eat out
+Impressao,4.5,28/11/2019,Cash,Study,Documents
+Oazi,29.86,29/11/2019,Alelo,Food,Eat out
+Catherine,124.9,29/11/2019,Parents,Electronics,Games
+BRAX,0.27,30/11/2019,Easy,Taxes,Buy tax
+Agua,72.33333333,30/11/2019,Parents,Home,Water
+Cafe,75,30/11/2019,Parents,Food,Home meal
+Luz,138.6666667,30/11/2019,Parents,Home,Electricity
+Mercado,150,30/11/2019,Parents,Food,Home meal
+Mercado,150,30/11/2019,Parents,Food,Mercado
+Internet,191.3333333,30/11/2019,Parents,Home,Internet
+Refeicoes fora,297,30/11/2019,Parents,Food,Eat out
+Refeicoes em casa,450,30/11/2019,Parents,Food,Home meal
+Carro,1000,30/11/2019,Parents,Transport,Car
+Piscininha,18.7,03/12/2019,Alelo,Food,Eat out
+Headset,88.98,03/12/2019,Nu,Gift,Parents
+Monografia,13,04/12/2019,Nu,Study,Documents
+Cuca,23.9,04/12/2019,Alelo,Food,Eat out
+Monografia,39,04/12/2019,Cash,Study,Documents
+Oazi,29.41,06/12/2019,Alelo,Food,Eat out
+Piscininha,19.69,10/12/2019,Alelo,Food,Eat out
+New taste kilo,23.9,11/12/2019,Alelo,Food,Eat out
+Oazi,26.31,12/12/2019,Alelo,Food,Eat out
+Mcao,36.5,12/12/2019,Alelo,Food,Snack
+Mcao,7.9,13/12/2019,Alelo,Food,Eat out
+Oazi,27.2,13/12/2019,Alelo,Food,Eat out
+IVVB,0.63,14/12/2019,Easy,Taxes,Buy tax
+Detran,43.77,15/12/2019,Nu,Taxes,Government
+Detran,86.77,15/12/2019,Parents,Taxes,Government
+Flight Foz,1081.8,15/12/2019,Parents,Travel,Flight
+Flight Brasil,4412.15,15/12/2019,Parents,Travel,Flight
+Uber,20.7,18/12/2019,Nu,Transport,Uber
+Oazi,24.53,19/12/2019,Alelo,Food,Eat out
+Mcao,32.5,19/12/2019,Alelo,Food,Eat out
+Torta,15.9,20/12/2019,Alelo,Food,Snack
+Piscininha,19.91,20/12/2019,Alelo,Food,Eat out
+Oazi,25.87,23/12/2019,Alelo,Food,Eat out
+Airbnb Foz,527.74,23/12/2019,Nu,Travel,Hotel
+Taco bell,31.9,26/12/2019,Alelo,Food,Eat out
+Rappizza of Friendship,10.77,27/12/2019,Nu,Food,Eat out
+Agua,72.33333333,30/12/2019,Parents,Home,Water
+Cafe,75,30/12/2019,Parents,Food,Home meal
+Headset,88.98,30/12/2019,Nu,Electronics,Hardware
+Luz,138.6666667,30/12/2019,Parents,Home,Electricity
+Internet,191.3333333,30/12/2019,Parents,Home,Internet
+Refeicoes fora,297,30/12/2019,Parents,Food,Eat out
+Refeicoes em casa,450,30/12/2019,Parents,Food,Home meal
+Carro,1000,30/12/2019,Parents,Transport,Car
+Oazi,38.14,02/01/2020,Alelo,Food,Eat out
+Oazi,31.53,03/01/2020,Alelo,Food,Eat out
+Parque das aves,400,05/01/2020,Nu,Travel,Tour
+Macuco Safari,492,05/01/2020,Parents,Travel,Tour
+Oazi,33.53,06/01/2020,Alelo,Food,Eat out
+Piscininha,11.33,07/01/2020,Alelo,Food,Eat out
+Oazi,23.84,08/01/2020,Alelo,Food,Eat out
+BBSD,0.29,09/01/2020,Easy,Taxes,Buy tax
+Recanto,21.6,09/01/2020,Alelo,Food,Eat out
+Piscininha,20.64,10/01/2020,Alelo,Food,Eat out
+BRAX,0.39,13/01/2020,Easy,Taxes,Buy tax
+Recanto,23.76,13/01/2020,Alelo,Food,Eat out
+Sympla,50,13/01/2020,Nu,Travel,Tour
+Matrician,23.18,14/01/2020,Alelo,Food,Eat out
+Lumari,20.23,15/01/2020,Alelo,Food,Eat out
+Lumari,20.02,16/01/2020,Alelo,Food,Eat out
+Recanto,23.52,17/01/2020,Alelo,Food,Eat out
+Mc Rappi,30.5,19/01/2020,Nu,Food,Eat out
+Casarao,28.13,20/01/2020,Alelo,Food,Eat out
+Lumari,22.99,21/01/2020,Alelo,Food,Eat out
+Casarao,27.55,22/01/2020,Alelo,Food,Eat out
+Achapa,22.5,23/01/2020,Alelo,Food,Snack
+Casarao,32.22,23/01/2020,Alelo,Food,Eat out
+Bela restau,20.23,24/01/2020,Alelo,Food,Eat out
+Bela restau,20.99,27/01/2020,Alelo,Food,Eat out
+Cataratas,221,27/01/2020,Nu,Travel,Tour
+Acai,9.8,28/01/2020,Nu,Food,Snack
+Bela restau,21.25,28/01/2020,Alelo,Food,Eat out
+Uber,13.25,30/01/2020,Nu,Travel,Transport
+Mc,53.4,30/01/2020,Alelo,Travel,Food
+IVVB,0.45,31/01/2020,Easy,Taxes,Buy tax
+Agua,72.33333333,31/01/2020,Parents,Home,Water
+Cafe,75,31/01/2020,Parents,Food,Home meal
+Luz,138.6666667,31/01/2020,Parents,Home,Electricity
+Internet,191.3333333,31/01/2020,Parents,Home,Internet
+Refeicoes fora,297,31/01/2020,Parents,Food,Eat out
+Refeicoes em casa,450,31/01/2020,Parents,Food,Home meal
+Carro,1000,31/01/2020,Parents,Transport,Car
+Assentos Flight Foz,110,01/02/2020,Nu,Travel,Flight
+Duty free,20.8,02/02/2020,Nu,Travel,Snack
+Intimate remedio,40.19,02/02/2020,Nu,Travel,Health
+Hot Dog,46,02/02/2020,Nu,Travel,Food
+Taxi,60,02/02/2020,Nu,Travel,Transport
+Lencos,13.97,03/02/2020,Nu,Travel,Health
+Mercado,29.37,03/02/2020,Nu,Travel,Mercado
+Restau ruim,34.25,03/02/2020,Nu,Travel,Food
+Griletto,51.8,03/02/2020,Alelo,Travel,Food
+Locker Macuco,10,04/02/2020,Nu,Travel,Tour
+Creme,20,04/02/2020,Nu,Travel,Health
+Mercado,45,04/02/2020,Cash,Travel,Mercado
+Bus Foz,64,04/02/2020,Cash,Travel,Transport
+Sanduba Cataratas,75.96,04/02/2020,Nu,Travel,Food
+Mercado,7.28,05/02/2020,Nu,Travel,Mercado
+Uber,8.69,05/02/2020,Nu,Travel,Transport
+Uber,9.19,05/02/2020,Nu,Travel,Transport
+Uber,12.56,05/02/2020,Nu,Travel,Transport
+Uber,21.58,05/02/2020,Nu,Travel,Transport
+Restau,28,06/02/2020,Nu,Travel,Food
+Mc,59.95,06/02/2020,Alelo,Travel,Food
+BBSD,0.19,07/02/2020,Easy,Taxes,Buy tax
+Mc,11.9,08/02/2020,Nu,Travel,Food
+Chocolate,35.5,08/02/2020,Nu,Travel,Gift
+Outback,107.17,08/02/2020,Alelo,Travel,Food
+Silva,132.49,09/02/2020,Nu,Travel,Mercado
+Condoms,11.9,10/02/2020,Nu,Travel,Health
+Griletto,52.8,10/02/2020,Nu,Travel,Food
+Mercado,33.76,11/02/2020,Nu,Travel,Mercado
+Madero,84,12/02/2020,Nu,Travel,Food
+Brigadeiro,11,13/02/2020,Nu,Travel,Food
+Mc,11.9,13/02/2020,Nu,Travel,Food
+Baked tato,28.9,13/02/2020,Nu,Travel,Food
+Churras,31.8,13/02/2020,Alelo,Travel,Food
+Mochila,99.9,13/02/2020,Nu,Gift,Dasha
+Mc fritas,11.9,16/02/2020,Alelo,Food,Snack
+Escape game,59.25,16/02/2020,Nu,Tour,Tour
+Lumari,22.99,17/02/2020,Alelo,Food,Tour
+Lumari,22.99,18/02/2020,Alelo,Food,Tour
+Bela restau,20.99,19/02/2020,Alelo,Food,Tour
+Lumari,22.99,20/02/2020,Alelo,Food,Tour
+BRAX,0.29,21/02/2020,Easy,Taxes,Buy tax
+Bela restau,23.81,21/02/2020,Alelo,Food,Eat out
+Sapiens Dasha,35.43,26/02/2020,Nu,Gift,Dasha
+Lumari,22.99,26/02/2020,Alelo,Food,Eat out
+3B,30.69,27/02/2020,Alelo,Food,Eat out
+Acai,14,28/02/2020,Nu,Food,Snack
+Lumari,22.99,28/02/2020,Alelo,Food,Eat out
+Agua,72.33333333,28/02/2020,Parents,Home,Water
+Cafe,75,28/02/2020,Parents,Food,Home meal
+Luz,138.6666667,28/02/2020,Parents,Home,Electricity
+Internet,191.3333333,28/02/2020,Parents,Home,Internet
+Refeicoes fora,297,28/02/2020,Parents,Food,Eat out
+Refeicoes em casa,450,28/02/2020,Parents,Food,Home meal
+Carro,1000,28/02/2020,Parents,Transport,Car
+Agua,72.33333333,01/03/2020,Parents,Home,Water
+Cafe,75,01/03/2020,Parents,Food,Home meal
+Luz,138.6666667,01/03/2020,Parents,Home,Electricity
+Internet,191.3333333,01/03/2020,Parents,Home,Internet
+Refeicoes fora,297,01/03/2020,Parents,Food,Eat out
+Refeicoes em casa,450,01/03/2020,Parents,Food,Home meal
+Lumari,22.99,02/03/2020,Alelo,Food,Eat out
+Lumari,22.99,03/03/2020,Alelo,Food,Eat out
+BBSD,0.36,04/03/2020,Easy,Taxes,Buy tax
+Lumari,22.99,04/03/2020,Alelo,Food,Eat out
+Lumari,22.99,05/03/2020,Alelo,Food,Eat out
+3B,32.89,06/03/2020,Alelo,Food,Eat out
+Di Mario,32.6,07/03/2020,Alelo,Food,Eat out
+McDondals,39.9,08/03/2020,Nu,Food,Eat out
+Acai,21,09/03/2020,Nu,Food,Snack
+Lumari,22.99,09/03/2020,Alelo,Food,Eat out
+Casarao,23.55,10/03/2020,Alelo,Food,Eat out
+Sitio,42.07,10/03/2020,Nu,Tour,Tour
+Cachoeira,29.5,11/03/2020,Alelo,Food,Eat out
+Lumari,22.99,12/03/2020,Alelo,Food,Eat out
+Acai,22,13/03/2020,Nu,Food,Snack
+Sapiens Dasha,35.41,26/03/2020,Nu,Gift,Dasha
+Agua,72.33333333,01/04/2020,Parents,Home,Water
+Cafe,75,01/04/2020,Parents,Food,Home meal
+Luz,138.6666667,01/04/2020,Parents,Home,Electricity
+Internet,191.3333333,01/04/2020,Parents,Home,Internet
+Refeicoes em casa,550,01/04/2020,Parents,Food,Home meal
+?,35.41,01/04/2020,Nu,Gift,Dasha
+Contas,5746.47,20/04/2020,Nu,Loan,Bill
+Contas,4040.68,20/04/2020,Nu,Loan,Bill
+Contas,2276.18,22/04/2020,Nu,Loan,Bill
+Sapiens Dasha,70.73,28/04/2020,Nu,Gift,Dasha
+Agua,72.33333333,01/05/2020,Parents,Home,Water
+Cafe,75,01/05/2020,Parents,Food,Home meal
+Luz,138.6666667,01/05/2020,Parents,Home,Electricity
+Internet,191.3333333,01/05/2020,Parents,Home,Internet
+Refeicoes em casa,550,01/05/2020,Parents,Food,Home meal
+Cels,2774.9,02/05/2020,Nu,Gift,Parents
+Contas,5579.97,19/05/2020,Nu,Loan,Bill
+BBSD,0.19,21/05/2020,Easy,Taxes,Buy tax
+DARF ,2282.43,27/05/2020,Nu,Loan,Debt
+Agua,72.33333333,01/06/2020,Parents,Home,Water
+Cafe,75,01/06/2020,Parents,Food,Home meal
+Luz,138.6666667,01/06/2020,Parents,Home,Electricity
+Internet,191.3333333,01/06/2020,Parents,Home,Internet
+Refeicoes em casa,550,01/06/2020,Parents,Food,Home meal
+Cartoes,4799.42,18/06/2020,Nu,Loan,Credit
+DARF ,30885.75,26/06/2020,Nu,Loan,Debt
+Agua,72.33333333,01/07/2020,Parents,Home,Water
+Cafe,75,01/07/2020,Parents,Food,Home meal
+Luz,138.6666667,01/07/2020,Parents,Home,Electricity
+Internet,191.3333333,01/07/2020,Parents,Home,Internet
+Refeicoes em casa,550,01/07/2020,Parents,Food,Home meal
+Cartoes,3507.43,20/07/2020,Nu,Loan,Credit
+Cadeira,204.98,25/07/2020,Nu,Gift,Parents
+?,0.07,25/07/2020,Nu,Gift,Parents
+Agua,72.33333333,01/08/2020,Parents,Home,Water
+Cafe,75,01/08/2020,Parents,Food,Home meal
+Luz,138.6666667,01/08/2020,Parents,Home,Electricity
+Internet,191.3333333,01/08/2020,Parents,Home,Internet
+Refeicoes em casa,550,01/08/2020,Parents,Food,Home meal
+Cadeira,204.96,25/08/2020,Nu,Gift,Parents
+Agua,72.33333333,01/09/2020,Parents,Home,Water
+Cafe,75,01/09/2020,Parents,Food,Home meal
+Luz,138.6666667,01/09/2020,Parents,Home,Electricity
+Internet,191.3333333,01/09/2020,Parents,Home,Internet
+Refeicoes em casa,550,01/09/2020,Parents,Food,Home meal
+Cartoes,2198.03,17/09/2020,Nu,Loan,Credit
+Cadeira,204.96,25/09/2020,Nu,Gift,Parents
+IVVB,0.29,28/09/2020,Easy,Taxes,Buy tax
+Parents,779.79,30/09/2020,Alelo,Loan,Loan
+Agua,72.33333333,01/10/2020,Parents,Home,Water
+Cafe,75,01/10/2020,Parents,Food,Home meal
+Luz,138.6666667,01/10/2020,Parents,Home,Electricity
+Internet,191.3333333,01/10/2020,Parents,Home,Internet
+Refeicoes em casa,550,01/10/2020,Parents,Food,Home meal
+?,1095.9,01/10/2020,Alelo,Loan,Loan
+PC ,5873.63,07/10/2020,Nu,Electronics,Hardware
+PC ,2132.76,07/10/2020,Nu,Electronics,Hardware
+Genshin,20.97,18/10/2020,Nu,Electronics,Games
+Cartoes,3173.25,20/10/2020,Nu,Loan,Credit
+PC ,232.63,20/10/2020,Nu,Electronics,Hardware
+Parents,1264.29,30/10/2020,Alelo,Loan,Loan
+Agua,72.33333333,01/11/2020,Parents,Home,Water
+Cafe,75,01/11/2020,Parents,Food,Home meal
+Luz,138.6666667,01/11/2020,Parents,Home,Electricity
+Internet,191.3333333,01/11/2020,Parents,Home,Internet
+Refeicoes em casa,550,01/11/2020,Parents,Food,Home meal
+Flight,6639.53,01/11/2020,Parents,Travel,Flight
+Genshin,30.69,18/11/2020,Nu,Electronics,Games
+Genshin,30.86,19/11/2020,Nu,Electronics,Games
+Rappi,49.78,29/11/2020,Nu,Food,Eat out
+Rappi,1.5,29/11/2020,Nu,Food,Snack
+Agua,72.33333333,01/12/2020,Parents,Home,Water
+Cafe,75,01/12/2020,Parents,Food,Home meal
+Luz,138.6666667,01/12/2020,Parents,Home,Electricity
+Internet,191.3333333,01/12/2020,Parents,Home,Internet
+Refeicoes em casa,550,01/12/2020,Parents,Food,Home meal
+McDondals,53.85,06/12/2020,Nu,Food,Eat out
+Ofner,14.5,06/12/2020,Nu,Food,Snack
+Centauro,129.98,06/12/2020,Nu,Gift,Parents
+Natura,62.2,06/12/2020,Nu,Gift,Parents
+Genshin,60.51,08/12/2020,Nu,Electronics,Games
+McDondals,76.8,15/12/2020,Alelo,Food,Eat out
+Genshin,30.63,17/12/2020,Nu,Electronics,Games
+IBT Institut,35,17/12/2020,Nu,Tour,Tour
+Plenty Park,25,21/12/2020,Nu,Tour,Tour
+Girao,1200,21/12/2020,Nu,Health,Dasha
+Pimenta verde,38.8,30/12/2020,Nu,Food,Dasha
+Deco Acessor,69,30/12/2020,Nu,Gift,Dasha
+IVVB,0.45,01/01/2021,Easy,Taxes,Buy tax
+Agua,72.33333333,01/01/2021,Parents,Home,Water
+Cafe,75,01/01/2021,Parents,Food,Home meal
+Luz,138.6666667,01/01/2021,Parents,Home,Electricity
+Internet,191.3333333,01/01/2021,Parents,Home,Internet
+Refeicoes em casa,550,01/01/2021,Parents,Food,Home meal
+Healthcia,43.47,04/01/2021,Nu,Health,Dasha
+Mercado,46.95,04/01/2021,Nu,Food,Mercado
+Livro,12,04/01/2021,Nu,Gift,Dasha
+Healthcia,62.64,07/01/2021,Nu,Health,Dasha
+Griletto,21.9,08/01/2021,Alelo,Food,Eat out
+McDondals,46,08/01/2021,Alelo,Food,Eat out
+McDondals,74,16/01/2021,Alelo,Food,Eat out
+Genshin,31,23/01/2021,Nu,Electronics,Games
+Riachuelo,149.6,23/01/2021,Nu,Gift,Dasha
+Montana,89.9,23/01/2021,Alelo,Food,Eat out
+Lanches,73.45,23/01/2021,Alelo,Food,Eat out
+Magic chicken,64,23/01/2021,Alelo,Food,Eat out
+Lost,1,23/01/2021,Alelo,Taxes,Lost
+Zoo,130,24/01/2021,Nu,Tour,Tour
+lachonete,13,24/01/2021,Nu,Food,Eat out
+McDondals,23.9,24/01/2021,Nu,Food,Eat out
+Rappi,56.66,01/02/2021,Nu,Food,Eat out
+Agua,72.33333333,01/02/2021,Parents,Home,Water
+Cafe,75,01/02/2021,Parents,Food,Home meal
+Luz,138.6666667,01/02/2021,Parents,Home,Electricity
+Internet,191.3333333,01/02/2021,Parents,Home,Internet
+Refeicoes em casa,550,01/02/2021,Parents,Food,Home meal
+Bouquet,100,06/02/2021,Nu,Gift,Dasha
+Protec mala,75,12/02/2021,Nu,Travel,Dasha
+Contas,4013.56,17/02/2021,Nu,Loan,Bill
+BRAX,0.31,25/02/2021,Easy,Taxes,Buy tax
+MSFT,0.17,26/02/2021,Easy,Taxes,Buy tax
+Cartoes,2322.81,17/03/2021,Nu,Loan,Credit
+Skin Sett,27.75,10/03/2021,Nu,Electronics,Games
+TSLA34,0.28,02/03/2021,Easy,Taxes,Buy tax
+IRDM,0.44,04/03/2021,Easy,Taxes,Buy tax
+IRDM,0.21,04/03/2021,Easy,Taxes,Buy tax
+BTC,0.78,03/03/2021,BT,Taxes,Buy tax
+BTC,2.2,03/03/2021,BT,Taxes,Buy tax
+ETH,1.05,03/03/2021,BT,Taxes,Buy tax
+DISB34,0.14,04/03/2021,Easy,Taxes,Buy tax
+Parents,466.88,03/04/2021,Alelo,Loan,Loan
+Parents,466.89,03/04/2021,Alelo,Loan,Loan
+Parents,210.18,03/04/2021,Alelo,Loan,Loan
+Parents,132.98,03/04/2021,Alelo,Loan,Loan
+Parents,667.43,29/04/2021,Alelo,Loan,Loan
+Parents,64.51,29/04/2021,Alelo,Loan,Loan
+DISB34,0.18,09/04/2021,Easy,Taxes,Buy tax
+TSLA34,0.19,09/04/2021,Easy,Taxes,Buy tax
+FBOK34,0.19,22/04/2021,Easy,Taxes,Buy tax
+IVVB11,0.78,27/04/2021,Easy,Taxes,Buy tax
+BTC,8.75,18/04/2021,BT,Taxes,Buy tax
+ETH,3.75,18/04/2021,BT,Taxes,Buy tax
+? ,0.84,04/05/2021,Nu,Lost,Lost
+MSFT34,0.32,10/05/2021,Easy,Taxes,Buy tax
+TSLA34,0.19,14/05/2021,Easy,Taxes,Buy tax
+IVVB11,0.79,14/05/2021,Easy,Taxes,Buy tax
+BTC,7.7,20/05/2021,BT,Taxes,Buy tax
+ETH,3.3,20/05/2021,BT,Taxes,Buy tax
+DISB34,0.18,21/05/2021,Easy,Taxes,Buy tax
+Parents,151.29,20/05/2021,Alelo,Loan,Loan
+Parents,60,20/05/2021,Alelo,Loan,Loan
+Parents,104.61,25/05/2021,Alelo,Loan,Loan
+Parents,737.94,25/05/2021,Alelo,Loan,Loan
+Parents,200,30/05/2021,Alelo,Loan,Loan
