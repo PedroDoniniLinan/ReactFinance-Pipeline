@@ -124,8 +124,8 @@ def processPortfolio(portfolio, prices, function, valueColumn):
 
 
 # =============== MAIN =============== #
-def computePortfolioIncome():
-    portfolio = pd.read_csv('data/data_portfolio.csv')
+def computePortfolioIncome(filterRemove):
+    portfolio = read('data/data_portfolio.csv', filterRemove)
     portfolio[DATE] = portfolio[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
     prices = pd.read_csv('data/data_prices.csv')
 
@@ -149,10 +149,10 @@ def computePortfolioIncome():
     return portfolioIncome[portfolioIncome[VALUE] != 0]
 
 
-def readData():
+def readData(filterRemove):
     # income
-    income = pd.read_csv('data/data_income.csv')
-    portfolio = computePortfolioIncome()
+    income = read('data/data_income.csv', filterRemove)
+    portfolio = computePortfolioIncome(filterRemove)
     income = pd.concat([income, portfolio])
 
     income[CATEGORY] = income[CATEGORY].fillna('')
@@ -163,7 +163,7 @@ def readData():
     income = income.rename(columns={VALUE: INCOME})
 
     # expenses
-    expenses = pd.read_csv('data/data_expenses.csv')
+    expenses = read('data/data_expenses.csv', filterRemove)
     expenses[CATEGORY] = expenses[CATEGORY].fillna('')
     expenses[SUBCATEGORY] = expenses[SUBCATEGORY].fillna('')
     expenses[DATE] = expenses[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
@@ -173,7 +173,7 @@ def readData():
 
 
     # tranfers
-    transfer = pd.read_csv('data/data_transf.csv')
+    transfer = read('data/data_transf.csv', filterRemove)
     transfer[DATE] = transfer[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
     transfer[DATE] = date_trunc(transfer[DATE], 'month')
     transferOut = pd.pivot_table(transfer, values=[VALUE], index=[FROM, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
@@ -187,7 +187,7 @@ def readData():
 
 def readNU():
     # income
-    income = pd.read_csv('data/data_income.csv')
+    income = read('data/data_income.csv', True)
     income[CATEGORY] = income[CATEGORY].fillna('')
     income[SUBCATEGORY] = income[SUBCATEGORY].fillna('')
     income = income[income[ACCOUNT] == NU]
@@ -197,6 +197,7 @@ def readNU():
     flexIncome[DATE] = flexIncome[DATE].apply(lambda x : getFlexDate(x))
     flexIncome[DATE] = date_trunc(flexIncome[DATE], 'month')
 
+    # print(income[income[DATE] < dt.datetime.strptime(str('01/11/2019'),'%d/%m/%Y')])
     income[DATE] = date_trunc(income[DATE], 'month')
     income = pd.pivot_table(income, values=[VALUE], index=[DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
     income = income.rename(columns={VALUE: INCOME})
@@ -209,7 +210,7 @@ def readNU():
     flexIncome = flexIncome.rename(columns={VALUE: INCOME})
 
     # expenses
-    expenses = pd.read_csv('data/data_expenses.csv')
+    expenses = read('data/data_expenses.csv', True)
     expenses = expenses[expenses[ACCOUNT] == NU]
     expenses[CATEGORY] = expenses[CATEGORY].fillna('')
     expenses[SUBCATEGORY] = expenses[SUBCATEGORY].fillna('')
@@ -226,7 +227,7 @@ def readNU():
     expenses = expenses.rename(columns={VALUE: EXPENSES})
 
     # tranfers
-    transfer = pd.read_csv('data/data_transf.csv')
+    transfer = read('data/data_transf.csv', True)
     transfer = transfer[(transfer[FROM] == NU) | (transfer[TO] == NU)]
     transfer[DATE] = transfer[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
 
@@ -244,17 +245,20 @@ def readNU():
     transfer[DATE] = date_trunc(transfer[DATE], 'month')
     transferOut = pd.pivot_table(transfer, values=[VALUE], index=[FROM, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
     transferOut = transferOut[transferOut[FROM] == NU]
+    transferOut = transferOut[[DATE, VALUE]]
     transferIn = pd.pivot_table(transfer, values=[VALUE], index=[TO, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
     transferIn = transferIn[transferIn[TO] == NU]
+    transferIn = transferIn[[DATE, VALUE]]
 
     transferOut = transferOut.rename(columns={VALUE: 'Out'})
     transferIn = transferIn.rename(columns={VALUE: 'In'})
 
     # consolidated
-    df = income.join(expenses, rsuffix='_2').join(transferOut, rsuffix='_3').join(transferIn, rsuffix='_4')
+    df = income.set_index(DATE).join(expenses.set_index(DATE), rsuffix='_2').join(transferOut.set_index(DATE), rsuffix='_3').join(transferIn.set_index(DATE), rsuffix='_4', how='outer')
     df = df.fillna(0)
     df[POSITION] = df[INCOME] - df[EXPENSES] - df['Out'] + df['In']
     df[POSITION] = df[POSITION].cumsum()
+    df = df.reset_index()
     df = df[[DATE, POSITION]]
 
     flexDf = flexIncome.join(flexExpenses, rsuffix='_2').join(flexTransferOut, rsuffix='_3').join(flexTransferIn, rsuffix='_4')
@@ -271,7 +275,7 @@ def readNU():
 
 
 def readPortfolio():
-    portfolio = pd.read_csv('data/data_portfolio.csv')
+    portfolio = read('data/data_portfolio.csv', True)
     portfolio[DATE] = portfolio[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
     prices = pd.read_csv('data/data_prices.csv')
 
@@ -283,6 +287,8 @@ def readPortfolio():
     portfolio = portfolio[[CATEGORY, SUBCATEGORY, DATE, POSITION, FLEX_POSITION, FLEX_INCOME]]
     portfolio = portfolio[(portfolio[POSITION] != 0) & (portfolio[FLEX_INCOME] != 0) & (portfolio[FLEX_POSITION] != 0)]
     portfolio[DATE] = portfolio[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
+    portfolio[DATE] = date_trunc(portfolio[DATE], 'month')
+
     return portfolio
 
 
@@ -298,6 +304,7 @@ def validateData(income, expenses, transferOut, transferIn, date):
     expenses = pd.pivot_table(expenses, values=[EXPENSES], index=[ACCOUNT], aggfunc={EXPENSES: np.sum}, fill_value=0)#.reset_index()
     transferOut = pd.pivot_table(transferOut, values=[VALUE], index=[ACCOUNT], aggfunc={VALUE: np.sum}, fill_value=0)#.reset_index()
     transferIn = pd.pivot_table(transferIn, values=[VALUE], index=[ACCOUNT], aggfunc={VALUE: np.sum}, fill_value=0)#.reset_index()
+
 
     transferOut = transferOut.rename(columns={VALUE: 'Out'})
     transferIn = transferIn.rename(columns={VALUE: 'In'})

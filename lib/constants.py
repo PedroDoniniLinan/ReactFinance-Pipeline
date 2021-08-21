@@ -8,10 +8,13 @@ SUBCATEGORY = 'Subcategory'
 POSITION = 'Position'
 FLEX_POSITION = 'Flex position'
 FLEX_INCOME = 'Flex income'
+REMOVE = 'Remove'
 
 NU = 'Nu'
 EASY = 'Easy'
 BT = 'BT'
+BNB = 'BNB'
+BFI = 'BlockFi'
 INVESTMENTS = 'Investments'
 
 FIXED_INCOME = 'Fixed income'
