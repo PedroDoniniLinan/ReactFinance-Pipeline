@@ -18,6 +18,6 @@ if __name__ == '__main__':
         records = income.to_dict('records') + expenses.to_dict('records')
         positionsRecords = positions.to_dict('records')
         print('Uploading data...')
-        mongo.replaceInsert(records, 'test')
-        mongo.replaceInsert(positionsRecords, 'positions')
+        # mongo.replaceInsert(records, 'test')
+        # mongo.replaceInsert(positionsRecords, 'positions')
         print('DONE')

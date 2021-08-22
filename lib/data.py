@@ -124,27 +124,28 @@ def processPortfolio(portfolio, prices, function, valueColumn):
 
 
 # =============== MAIN =============== #
-def computePortfolioIncome(filterRemove):
-    portfolio = read('data/data_portfolio.csv', filterRemove)
+def computePortfolioIncome(portfolio, filterRemove):
+    # portfolio = read('data/data_portfolio_.csv', filterRemove)
     portfolio[DATE] = portfolio[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
     prices = pd.read_csv('data/data_prices.csv')
 
     portfolio = portfolio.apply(lambda x : computeIncome(x, prices), axis=1)
     months = list(prices.columns)
     months.pop(0)
+    cols = prices.columns.tolist()
+    cols.insert(1, ACCOUNT)
     portfolioIncome = pd.melt(
-        portfolio[prices.columns], 
-        id_vars=[TICKER], 
+        portfolio[cols], 
+        id_vars=[TICKER, ACCOUNT], 
         value_vars=months,
         var_name=DATE, 
         value_name=VALUE
     )
     portfolioIncome = portfolioIncome.rename(columns={TICKER: NAME})
-    portfolioIncome[ACCOUNT] = portfolioIncome[NAME].apply(lambda x: mapAccounts(x))
+    # portfolioIncome[ACCOUNT] = ~portfolioIncome[NAME].apply(lambda x: mapAccounts(x))
     portfolioIncome[CATEGORY] = INVESTMENTS
     portfolioIncome[SUBCATEGORY] = portfolioIncome[NAME]
-    test = pd.pivot_table(portfolioIncome, values=[VALUE], index=[NAME, ACCOUNT, CATEGORY, SUBCATEGORY, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
-
+    # test = pd.pivot_table(portfolioIncome, values=[VALUE], index=[NAME, ACCOUNT, CATEGORY, SUBCATEGORY, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
 
     return portfolioIncome[portfolioIncome[VALUE] != 0]
 
@@ -152,7 +153,9 @@ def computePortfolioIncome(filterRemove):
 def readData(filterRemove):
     # income
     income = read('data/data_income.csv', filterRemove)
-    portfolio = computePortfolioIncome(filterRemove)
+    portfolioBuy = read('data/data_portfolio_.csv', filterRemove)
+    portfolio = computePortfolioIncome(portfolioBuy, filterRemove)
+    print(portfolio[portfolio[SUBCATEGORY] == 'BTC'])
     income = pd.concat([income, portfolio])
 
     income[CATEGORY] = income[CATEGORY].fillna('')
@@ -161,6 +164,8 @@ def readData(filterRemove):
     income[DATE] = date_trunc(income[DATE], 'month')
     income = pd.pivot_table(income, values=[VALUE], index=[ACCOUNT, CATEGORY, SUBCATEGORY, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
     income = income.rename(columns={VALUE: INCOME})
+
+    print(income[income[SUBCATEGORY] == 'BTC'])
 
     # expenses
     expenses = read('data/data_expenses.csv', filterRemove)
