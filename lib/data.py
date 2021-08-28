@@ -153,10 +153,15 @@ def computePortfolioIncome(portfolio, filterRemove):
 def readData(filterRemove):
     # income
     income = read('data/data_income.csv', filterRemove)
-    portfolioBuy = read('data/data_portfolio_.csv', filterRemove)
-    portfolio = computePortfolioIncome(portfolioBuy, filterRemove)
-    print(portfolio[portfolio[SUBCATEGORY] == 'BTC'])
-    income = pd.concat([income, portfolio])
+
+    portfolioBuy = read('data/data_portfolio_buy.csv', filterRemove)
+    portfolioBuy = computePortfolioIncome(portfolioBuy, filterRemove)
+    
+    portfolioSell = read('data/data_portfolio_sell.csv', filterRemove)
+    portfolioSell = computePortfolioIncome(portfolioSell, filterRemove)
+    portfolioSell[VALUE] = -portfolioSell[VALUE]
+    
+    income = pd.concat([income, portfolioBuy, portfolioSell])
 
     income[CATEGORY] = income[CATEGORY].fillna('')
     income[SUBCATEGORY] = income[SUBCATEGORY].fillna('')
@@ -164,8 +169,6 @@ def readData(filterRemove):
     income[DATE] = date_trunc(income[DATE], 'month')
     income = pd.pivot_table(income, values=[VALUE], index=[ACCOUNT, CATEGORY, SUBCATEGORY, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
     income = income.rename(columns={VALUE: INCOME})
-
-    print(income[income[SUBCATEGORY] == 'BTC'])
 
     # expenses
     expenses = read('data/data_expenses.csv', filterRemove)
