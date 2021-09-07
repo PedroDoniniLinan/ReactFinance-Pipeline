@@ -145,6 +145,7 @@ def computePortfolioIncome(portfolio, filterRemove):
     # portfolioIncome[ACCOUNT] = ~portfolioIncome[NAME].apply(lambda x: mapAccounts(x))
     portfolioIncome[CATEGORY] = INVESTMENTS
     portfolioIncome[SUBCATEGORY] = portfolioIncome[NAME]
+    # print(portfolioIncome[(portfolioIncome[NAME] == 'IRDM11') & (portfolioIncome[ACCOUNT] == 'Easy') & (portfolioIncome[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y')) >= dt.datetime.strptime('01/09/2021', '%d/%m/%Y'))])
     # test = pd.pivot_table(portfolioIncome, values=[VALUE], index=[NAME, ACCOUNT, CATEGORY, SUBCATEGORY, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
 
     return portfolioIncome[portfolioIncome[VALUE] != 0]
@@ -312,7 +313,6 @@ def validateData(income, expenses, transferOut, transferIn, date):
     expenses = pd.pivot_table(expenses, values=[EXPENSES], index=[ACCOUNT], aggfunc={EXPENSES: np.sum}, fill_value=0)#.reset_index()
     transferOut = pd.pivot_table(transferOut, values=[VALUE], index=[ACCOUNT], aggfunc={VALUE: np.sum}, fill_value=0)#.reset_index()
     transferIn = pd.pivot_table(transferIn, values=[VALUE], index=[ACCOUNT], aggfunc={VALUE: np.sum}, fill_value=0)#.reset_index()
-
 
     transferOut = transferOut.rename(columns={VALUE: 'Out'})
     transferIn = transferIn.rename(columns={VALUE: 'In'})
