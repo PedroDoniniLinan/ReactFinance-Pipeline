@@ -16,12 +16,16 @@ def mapAccounts(ticker):
 def mapCategory(ticker):
     if ticker in set(['IRDM11']):
         return REAL_STATE
-    if ticker in set(['BTC', 'ETH']):
+    if ticker in set(['BTC', 'ETH', 'ADA', 'SOL', 'AVAX', 'AXS', 'USDT']):
         return CRYPTO
+    if ticker in set(['USDT']):
+        return STABLECOIN
     if ticker in set(['BRAX11', 'BBSD11']):
         return BR_GROWTH
     if ticker in set(['TSLA34']):
         return US_SUPER_GROWTH
+    if ticker in set(['JPMC34']):
+        return US_FINANCES
     return US_GROWTH    
 
 
@@ -106,6 +110,7 @@ def processPortfolio(portfolio, prices, function, valueColumn):
     months.pop(0)
 
     tempPortfolio = portfolio.apply(lambda x : function(x, prices), axis=1)
+    tempPortfolio.to_csv('test/1.csv')
     tempPortfolio = pd.melt(
         tempPortfolio[prices.columns], 
         id_vars=[TICKER], 
@@ -116,9 +121,11 @@ def processPortfolio(portfolio, prices, function, valueColumn):
     tempPortfolio = tempPortfolio.rename(columns={TICKER: NAME})
     tempPortfolio[CATEGORY] = tempPortfolio[NAME].apply(lambda x: mapCategory(x))
     tempPortfolio[SUBCATEGORY] = tempPortfolio[NAME]
+    tempPortfolio.to_csv('test/2.csv')
     tempPortfolio = pd.pivot_table(tempPortfolio, values=[VALUE], index=[NAME, CATEGORY, SUBCATEGORY, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
     tempPortfolio = tempPortfolio.rename(columns={VALUE: valueColumn})
     tempPortfolio.set_index([NAME, CATEGORY, SUBCATEGORY, DATE])
+    tempPortfolio.to_csv('test/3.csv')
 
     return tempPortfolio
 
@@ -255,6 +262,7 @@ def readNU():
     transferOut = pd.pivot_table(transfer, values=[VALUE], index=[FROM, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
     transferOut = transferOut[transferOut[FROM] == NU]
     transferOut = transferOut[[DATE, VALUE]]
+
     transferIn = pd.pivot_table(transfer, values=[VALUE], index=[TO, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
     transferIn = transferIn[transferIn[TO] == NU]
     transferIn = transferIn[[DATE, VALUE]]
@@ -284,8 +292,14 @@ def readNU():
 
 
 def readPortfolio():
-    portfolio = read('data/data_portfolio.csv', True)
+    portfolio = read('data/data_portfolio_buy.csv', True)
     portfolio[DATE] = portfolio[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
+
+    portfolioSell = read('data/data_portfolio_sell.csv', True)
+    portfolioSell[DATE] = portfolioSell[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
+    portfolioSell[SHARES] = -portfolioSell[SHARES]  
+    portfolio = pd.concat([portfolio, portfolioSell])
+
     prices = pd.read_csv('data/data_prices.csv')
 
     portfolioFlexibleIncome = processPortfolio(portfolio, prices, computeFlexibleIncome, FLEX_INCOME)
@@ -294,9 +308,10 @@ def readPortfolio():
 
     portfolio = portfolioPositions.join(portfolioFlexibleIncome, rsuffix='_2').join(portfolioFlexPositions, rsuffix='_3')
     portfolio = portfolio[[CATEGORY, SUBCATEGORY, DATE, POSITION, FLEX_POSITION, FLEX_INCOME]]
-    portfolio = portfolio[(portfolio[POSITION] != 0) & (portfolio[FLEX_INCOME] != 0) & (portfolio[FLEX_POSITION] != 0)]
+    portfolio = portfolio[(portfolio[POSITION] != 0) | (portfolio[FLEX_INCOME] != 0) | (portfolio[FLEX_POSITION] != 0)]
     portfolio[DATE] = portfolio[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
     portfolio[DATE] = date_trunc(portfolio[DATE], 'month')
+
 
     return portfolio
 
