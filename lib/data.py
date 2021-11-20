@@ -16,7 +16,7 @@ def mapAccounts(ticker):
 def mapCategory(ticker):
     if ticker in set(['IRDM11']):
         return REAL_STATE
-    if ticker in set(['BTC', 'ETH', 'ADA', 'SOL', 'AVAX', 'AXS', 'USDT']):
+    if ticker in set(['BTC', 'ETH', 'ADA', 'SOL', 'AVAX', 'AXS', 'BNB']):
         return CRYPTO
     if ticker in set(['USDT']):
         return STABLECOIN
@@ -26,6 +26,8 @@ def mapCategory(ticker):
         return US_SUPER_GROWTH
     if ticker in set(['JPMC34']):
         return US_FINANCES
+    if ticker in set(['BRL']):
+        return CASH 
     return US_GROWTH    
 
 
@@ -130,6 +132,13 @@ def processPortfolio(portfolio, prices, function, valueColumn):
     return tempPortfolio
 
 
+def getExchange(df):
+    prices = pd.read_csv('data/data_prices.csv')
+    df[DATE] = dt.datetime.strptime(str(df[DATE]),'%d/%m/%Y')#.date())
+    df[DATE] = dt.datetime(df[DATE].year, df[DATE].month, 1)
+    return prices[prices[TICKER] == df[TICKER]][(df[DATE]- dt.timedelta(days=1)).strftime('%d/%m/%Y')].item()
+
+
 # =============== MAIN =============== #
 def computePortfolioIncome(portfolio, filterRemove):
     # portfolio = read('data/data_portfolio_.csv', filterRemove)
@@ -156,6 +165,16 @@ def computePortfolioIncome(portfolio, filterRemove):
     # test = pd.pivot_table(portfolioIncome, values=[VALUE], index=[NAME, ACCOUNT, CATEGORY, SUBCATEGORY, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
 
     return portfolioIncome[portfolioIncome[VALUE] != 0]
+
+
+def makePortfolio(df, filterRemove):
+    port = df[[VALUE, DATE, ACCOUNT, CURRENCY]].copy()
+    port[TICKER] = port[CURRENCY]
+    port[BUY] = port.apply(getExchange, axis=1)
+    port[SHARES] = port[VALUE]
+    port[BUY_TAX] = 0
+    port = port[[TICKER, ACCOUNT, BUY, SHARES, DATE]].copy()
+    port = computePortfolioIncome(port, filterRemove)
 
 
 def readData(filterRemove):
@@ -278,16 +297,19 @@ def readNU():
     df = df.reset_index()
     df = df[[DATE, POSITION]]
 
-    flexDf = flexIncome.join(flexExpenses, rsuffix='_2').join(flexTransferOut, rsuffix='_3').join(flexTransferIn, rsuffix='_4')
+    flexDf = flexIncome.set_index(DATE).join(flexExpenses.set_index(DATE), rsuffix='_2').join(flexTransferOut.set_index(DATE), rsuffix='_3').join(flexTransferIn.set_index(DATE), rsuffix='_4')
     flexDf = flexDf.fillna(0)
     flexDf[FLEX_POSITION] = flexDf[INCOME] - flexDf[EXPENSES] - flexDf['Out'] + flexDf['In']
     flexDf[FLEX_POSITION] = flexDf[FLEX_POSITION].cumsum()
+    flexDf = flexDf.reset_index()
     flexDf = flexDf[[DATE, FLEX_POSITION]]
 
-    resultDf = df.join(flexDf, rsuffix='_2').join(yieldIncome, rsuffix='_3')
+    resultDf = df.set_index(DATE).join(flexDf.set_index(DATE), rsuffix='_2').join(yieldIncome.set_index(DATE), rsuffix='_3')
+    resultDf = resultDf.reset_index()
     resultDf = resultDf[[DATE, POSITION, FLEX_POSITION, FLEX_INCOME]]
     resultDf[CATEGORY] = FIXED_INCOME
     resultDf[SUBCATEGORY] = NU
+
     return resultDf
 
 
