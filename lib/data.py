@@ -6,42 +6,170 @@ import datetime as dt
 import numpy as np
 
 
-# =============== AUX =============== #
-def mapAccounts(ticker):
-    if ticker in set(['BTC', 'ETH']):
-        return BT
-    return EASY            
+# =============== BALANCE ============== #
+
+def readFlow(name, currency, fillCol, truncate, groupBy, filterRemove):
+    df = read('data/data_' + name + '.csv', currency, filterRemove)
+    for col in fillCol:
+        df[col] = df[col].fillna('')
+    df[DATE] = df[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
+    df = truncGroup(df, truncate, groupBy)
+    return df
 
 
-def mapCategory(ticker):
-    if ticker in set(['IRDM11']):
-        return REAL_STATE
-    if ticker in set(['BTC', 'ETH', 'ADA', 'SOL', 'AVAX', 'AXS', 'BNB']):
-        return CRYPTO
-    if ticker in set(['USDT']):
-        return STABLECOIN
-    if ticker in set(['BRAX11', 'BBSD11']):
-        return BR_GROWTH
-    if ticker in set(['TSLA34']):
-        return US_SUPER_GROWTH
-    if ticker in set(['JPMC34']):
-        return US_FINANCES
-    if ticker in set(['BRL']):
-        return CASH 
-    return US_GROWTH    
+def calculateBalance(df, c, k, groupBy, balanceType):
+    if df.empty:
+        return df, pd.DataFrame([])
+    if c == k:
+        df = truncGroup(df, True, groupBy)
+        return df, pd.DataFrame([])
+    port = makePortfolio(df, c, k, balanceType)
+    df[VALUE] = df.apply(lambda x: x[VALUE] * linearPrice(c, k, x[DATE]), axis=1)
+    df = truncGroup(df, True, groupBy)
+    df = df[[DATE, CATEGORY, SUBCATEGORY, VALUE]]
+    port = computePortfolioIncome(port, c)
+    return df, port
 
 
-def getFlexDate(date):
-    if date.day >= DATE_TRESHOLD:
-        date = date.replace(day=1, month=date.month + 1 if date.month < 12 else 1, year=date.year if date.month < 12 else date.year + 1)
-    return date
+def readData(currency, filterRemove):
+    # income
+    income = readFlow('income', currency, [CATEGORY, SUBCATEGORY], True, [ACCOUNT, CATEGORY, SUBCATEGORY, DATE], filterRemove)
+    income = income.rename(columns={VALUE: INCOME})
+
+    # exchange
+    exchange = readFlow('exchange', None, [], True, None, filterRemove)
+    exIn = exchange.apply(lambda x: pd.Series([x[TICKER], x[SHARES], x[DATE], x[ACCOUNT]], index=[TICKER, VALUE, DATE, ACCOUNT]) if x[TYPE] == PURCHASE else pd.Series([x[CURRENCY], x[BUY] * x[SHARES], x[DATE], x[ACCOUNT]], index=[TICKER, VALUE, DATE, ACCOUNT]), axis=1)
+    exOut = exchange.apply(lambda x: pd.Series([x[CURRENCY], -(x[BUY]*x[SHARES]), x[DATE], x[ACCOUNT]], index=[TICKER, VALUE, DATE, ACCOUNT])  if x[TYPE] == PURCHASE else pd.Series([x[TICKER], -x[SHARES], x[DATE], x[ACCOUNT]], index=[TICKER, VALUE, DATE, ACCOUNT]), axis=1)
+    exchange = pd.concat([exIn, exOut])
+    exchange = exchange[exchange[TICKER] == currency]
+    exchange = exchange.rename(columns={VALUE: EXCHANGE})
+
+    # expenses
+    expenses = readFlow('expenses', currency, [CATEGORY, SUBCATEGORY], True, [ACCOUNT, CATEGORY, SUBCATEGORY, DATE], filterRemove)
+    expenses = expenses.rename(columns={VALUE: EXPENSES})
+
+    # tranfers
+    transferOut = readFlow('transf', currency, [], True, [FROM, DATE], filterRemove)
+    transferIn = readFlow('transf', currency, [], True, [TO, DATE], filterRemove)
+    transferOut = transferOut.rename(columns={FROM: ACCOUNT})
+    transferIn = transferIn.rename(columns={TO: ACCOUNT})
+    transferOut = transferOut.rename(columns={VALUE: OUT})
+    transferIn = transferIn.rename(columns={VALUE: IN})
+
+    return income, expenses, transferOut, transferIn, exchange
 
 
-def computeIncome(row, prices):
+# =============== EXCHANGE =============== #
+def getExchange(targetCurrency, sourceCurrency, date, debug=False):
+    prices = pd.read_csv('data/data_prices.csv')
+    date = (date - dt.timedelta(days=1)).strftime('%d/%m/%Y')
+    
+    if debug:
+        print(targetCurrency)
+        print(sourceCurrency)
+        # print(prices[(prices[TICKER] == 'BRL')&(prices[CURRENCY] == 'USD')][date].item())
+
+    fromSrc = prices[(prices[TICKER] == sourceCurrency)][CURRENCY].unique()
+
+    if targetCurrency in fromSrc:
+        return prices[(prices[TICKER] == sourceCurrency)&(prices[CURRENCY] == targetCurrency)][date].item()
+    
+    fromTgt = prices[(prices[TICKER] == targetCurrency)][CURRENCY].unique()
+    
+    if sourceCurrency in fromTgt:
+        return 1 / prices[(prices[TICKER] == targetCurrency)&(prices[CURRENCY] == sourceCurrency)][date].item()
+    
+    inter = list(set(fromSrc) & set(fromTgt))
+
+    if len(inter) > 0:
+        intermediaryCurrency = inter[0]
+        rateOne = prices[(prices[TICKER] == sourceCurrency)&(prices[CURRENCY] == intermediaryCurrency)][date].item()
+        rateTwo = prices[(prices[TICKER] == targetCurrency)&(prices[CURRENCY] == intermediaryCurrency)][date].item()
+        return rateOne / rateTwo
+    
+    toTgt = prices[(prices[CURRENCY] == targetCurrency)][TICKER].unique()
+    inter = list(set(fromSrc) & set(toTgt))
+
+    if len(inter) > 0:
+        intermediaryCurrency = inter[0]
+        rateOne = prices[(prices[TICKER] == sourceCurrency)&(prices[CURRENCY] == intermediaryCurrency)][date].item()
+        rateTwo = prices[(prices[TICKER] == intermediaryCurrency)&(prices[CURRENCY] == targetCurrency)][date].item()
+        
+        if debug:
+            print(sourceCurrency)
+            print(intermediaryCurrency)
+            print(targetCurrency)
+            print(rateOne)
+            print(rateTwo)
+
+        return rateOne * rateTwo
+
+    toSrc = prices[(prices[CURRENCY] == sourceCurrency)][TICKER].unique()
+    inter = list(set(toSrc) & set(toTgt))
+
+    if len(inter) > 0:
+        intermediaryCurrency = inter[0]
+        rateOne = prices[(prices[TICKER] == intermediaryCurrency)&(prices[CURRENCY] == sourceCurrency)][date].item()
+        rateTwo = prices[(prices[TICKER] == intermediaryCurrency)&(prices[CURRENCY] == targetCurrency)][date].item()
+        return rateTwo / rateOne
+    
+    inter = list(set(toSrc) & set(fromTgt))
+
+    if len(inter) > 0:
+        intermediaryCurrency = inter[0]
+        rateOne = prices[(prices[TICKER] == intermediaryCurrency)&(prices[CURRENCY] == sourceCurrency)][date].item()
+        rateTwo = prices[(prices[TICKER] == targetCurrency)&(prices[CURRENCY] == intermediaryCurrency)][date].item()
+        return 1 / rateOne * rateTwo
+
+
+def convertPrices(row, targetCurrency, originalTickers):
+    if row[0] in originalTickers:
+        row.iloc[0] = '-'
+        return row
+    for i, c in enumerate(row):
+        if i > 1:
+            row.iloc[i] = c * getExchange(targetCurrency, row[1], dt.datetime.strptime(str(row.index[i]),'%d/%m/%Y') + dt.timedelta(days=1))
+    row.iloc[1] = targetCurrency
+    return row
+
+
+def getConvertedPrices(targetCurrency):
+    prices = pd.read_csv('data/data_prices.csv')
+    originalPrices = prices[prices[CURRENCY] == targetCurrency]
+    originalTickers = originalPrices[TICKER].unique()
+    convertedPrices = prices[prices[CURRENCY] != targetCurrency]
+    convertedPrices = convertedPrices.apply(lambda x: convertPrices(x, targetCurrency, originalTickers), axis=1)
+    convertedPrices = convertedPrices[convertedPrices[TICKER] != '-']
+    prices = pd.concat([originalPrices, convertedPrices])
+    return prices
+
+
+def convertPortfolio(row, targetCurrency, debug=False):
+    if debug:
+        print('------------------')
+        print(row.loc[CURRENCY])
+        print(targetCurrency)
+        print(getExchange(targetCurrency, row.loc[CURRENCY], dt.datetime(row[DATE].year, row[DATE].month, 1)))
+        if getExchange(targetCurrency, row.loc[CURRENCY], dt.datetime(row[DATE].year, row[DATE].month, 1)) is None:
+            getExchange(targetCurrency, row.loc[CURRENCY], dt.datetime(row[DATE].year, row[DATE].month, 1), True)
+    row.loc[BUY] = row.loc[BUY] * getExchange(targetCurrency, row.loc[CURRENCY], dt.datetime(row[DATE].year, row[DATE].month, 1))
+    row.loc[CURRENCY] = targetCurrency
+    return row
+
+
+def linearPrice(targetCurrency, sourceCurrency, d):
+    y = getExchange(targetCurrency, sourceCurrency, getNextMonth(dt.datetime(d.year, d.month, 1)))
+    y0 = getExchange(targetCurrency, sourceCurrency, dt.datetime(d.year, d.month, 1))
+    m = (y - y0) / 30 
+    return m * (d.day - 1) + y0
+
+
+# =============== PORTFOLIO BALANCE =============== #
+def computeIncome(row, prices, debug=False):
     previousMonth = ''
     priceRow = prices[prices[TICKER] == row[TICKER]]
     for c in priceRow.columns:
-        if c == TICKER:
+        if c == TICKER or c == CURRENCY:
             continue
         date = dt.datetime.strptime(c, '%d/%m/%Y')#.date()
         if date < row[DATE]:
@@ -49,10 +177,179 @@ def computeIncome(row, prices):
         else:
             if previousMonth == '':
                 row[c] = (priceRow[c].item() - row[BUY]) * row[SHARES]
+                if debug:
+                    prinT(c)
+                    print(priceRow[c].item())
+                    print(row[BUY])
+                    # row[c] = priceRow[c].item() * row[SHARES]
+                    print(row.to_frame().T)
             else:
                 row[c] = (priceRow[c].item() - priceRow[previousMonth].item()) * row[SHARES]
+                if debug:
+                    prinT(c)
+                    print(priceRow[c].item())
+                    print(priceRow[previousMonth].item())
+                    # row[c] = priceRow[c].item() * row[SHARES]
+                    print(row.to_frame().T)
             previousMonth = c
     return row
+
+
+def computePortfolioIncome(portfolio, targetCurrency, debug=False):
+    prices = getConvertedPrices(targetCurrency)
+
+    # portfolio = portfolio.apply(lambda x : computeIncome(x, prices, True), axis=1)
+    portfolio = portfolio.apply(lambda x : computeIncome(x, prices), axis=1)
+    months = list(prices.columns)
+    months.pop(0)
+    months.pop(0)
+    cols = prices.columns.tolist()
+    cols.pop(1)
+
+    if debug:
+        print(portfolio[portfolio[TICKER] == 'FINA'])
+
+    portfolioIncome = pd.melt(
+        portfolio[cols], 
+        id_vars=[TICKER], 
+        value_vars=months,
+        var_name=DATE, 
+        value_name=VALUE
+    )
+    portfolioIncome = portfolioIncome.rename(columns={TICKER: NAME})
+    portfolioIncome[CATEGORY] = portfolioIncome[NAME].apply(lambda x: mapIncomeCategory(x))
+    portfolioIncome[SUBCATEGORY] = portfolioIncome[NAME]
+    portfolioIncome[DATE] = portfolioIncome[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
+    portfolioIncome[DATE] = date_trunc(portfolioIncome[DATE], 'month')
+    portfolioIncome.pop(NAME)
+    portfolioIncome = pd.pivot_table(portfolioIncome, values=[VALUE], index=[DATE, CATEGORY, SUBCATEGORY], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
+    # # test = pd.pivot_table(portfolioIncome, values=[VALUE], index=[NAME, ACCOUNT, CATEGORY, SUBCATEGORY, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
+
+    return portfolioIncome[portfolioIncome[VALUE] != 0]
+
+
+def makePortfolio(df, targetCurrency, sourceCurrency, portType):
+    if df.empty:
+        return df
+    port = df[[VALUE, DATE]].copy()
+    port[TICKER] = sourceCurrency
+    port[BUY] = port.apply(lambda x: linearPrice(targetCurrency, sourceCurrency, x[DATE]), axis=1)
+    port[SHARES] = port[VALUE] if portType == PURCHASE else -port[VALUE]
+    port[BUY_TAX] = 0
+    port[CURRENCY] = targetCurrency
+    port[BUY_TAX_CURRENCY] = targetCurrency
+    port = port[[TICKER, BUY, SHARES, BUY_TAX, DATE, CURRENCY, BUY_TAX_CURRENCY]].copy()
+    return port
+
+
+# =============== AUX =============== #        
+def mapAllocationCategory(ticker):
+    if ticker in set(['IRDM11']):
+        return REAL_STATE
+    if ticker in set(['AXS', 'SLP']):
+        return NFTG
+    if ticker in set(['ATLAS', 'POLIS']):
+        return NFTG
+    if ticker in set(['THC', 'THG']):
+        return NFTG
+    if ticker in set(['FINA']):
+        return NFTG
+    if ticker in set(['BTC', 'ETH', 'ADA', 'SOL', 'AVAX', 'BNB', 'DOT', 'MATIC', 'SAND', 'SHIB', 'SOL']):
+        return CRYPTO
+    if ticker in set(['USDT', 'USDC', 'BUSD']):
+        return STABLECOIN
+    if ticker in set(['BRAX11', 'BBSD11']):
+        return BR_GROWTH
+    if ticker in set(['TSLA34']):
+        return US_SUPER_GROWTH
+    if ticker in set(['JPMC34', 'MSBR34']):
+        return US_FINANCES
+    if ticker in set(['BRL', 'EUR']):
+        return CASH 
+    return US_GROWTH    
+
+
+def mapIncomeCategory(ticker):
+    if ticker in set(['AXS', 'SLP']):
+        return NFTG
+    if ticker in set(['ATLAS', 'POLIS']):
+        return NFTG
+    if ticker in set(['THC', 'THG']):
+        return NFTG
+    if ticker in set(['FINA']):
+        return NFTG
+    if ticker in set(['BTC', 'ETH', 'ADA', 'SOL', 'AVAX', 'BNB', 'DOT', 'MATIC', 'SAND', 'SHIB', 'SOL']):
+        return CRYPTO
+    if ticker in set(['USDT', 'USDC', 'BUSD']):
+        return STABLECOIN
+    if ticker in set(['BRL', 'EUR', 'USD']):
+        return CASH
+    return INVESTMENTS 
+
+
+def truncGroup(df, truncate, groupBy):
+    if truncate:
+        df[DATE] = date_trunc(df[DATE], 'month')
+    if groupBy is not None:
+        df = pd.pivot_table(df, values=[VALUE], index=groupBy, aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
+    return df
+
+
+# =============== VALIDATION =============== #
+def filterAggregateBalances(dfList, date):
+    filterDate = dt.datetime.strptime(str(date),'%d/%m/%Y')#.date()
+
+    joinedDf = pd.DataFrame({'A' : []})
+    for count, df in enumerate(dfList):
+        if df.empty:
+            continue
+        df = df[df[DATE] <= filterDate]
+        df = pd.pivot_table(df, values=[COLS[count]], index=[ACCOUNT], aggfunc={COLS[count]: np.sum}, fill_value=0)#.reset_index()
+        joinedDf = df if joinedDf.empty else joinedDf.join(df, how="outer")
+        joinedDf = joinedDf.fillna(0)
+
+        if not(VALUE in joinedDf.columns):
+            if count == 0 or count == 3 or count == 4:
+                joinedDf[VALUE] = joinedDf[COLS[count]]
+            else:
+                joinedDf[VALUE] = -joinedDf[COLS[count]]
+        elif count == 3 or count == 4:
+            joinedDf[VALUE] += joinedDf[COLS[count]]
+        else:
+            joinedDf[VALUE] -= joinedDf[COLS[count]]
+
+
+    return joinedDf
+
+
+def validateData(dict, currency, date, printMsg):
+    df = filterAggregateBalances(dict[currency], date)
+    df[VALUE] = df[VALUE].apply(lambda x: round(x, 6))
+
+    balances = read('data/data_balances.csv', currency, False)
+    balances[DATE] = balances[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
+    balances = balances[balances[DATE] == dt.datetime.strptime(str(date),'%d/%m/%Y')].set_index(ACCOUNT)
+    diff = balances[VALUE] - df[VALUE]
+    diff = diff.fillna(0)
+    diff = diff.apply(lambda x: round(x, 2))
+    if diff.sum() == 0 and balances.size != 0:
+        return True, df
+    else:
+        if printMsg:
+            print('-------------------ERROR-------------------')
+            print(df)
+            print(balances)
+            print(diff)
+        return False, df
+
+
+# =============== ALLOCATION =============== #        
+
+# =============== OTHER =============== #        
+def getFlexDate(date):
+    if date.day >= DATE_TRESHOLD:
+        date = date.replace(day=1, month=date.month + 1 if date.month < 12 else 1, year=date.year if date.month < 12 else date.year + 1)
+    return date
 
 
 def computeFlexibleIncome(row, prices):
@@ -121,7 +418,7 @@ def processPortfolio(portfolio, prices, function, valueColumn):
         value_name=VALUE
     )
     tempPortfolio = tempPortfolio.rename(columns={TICKER: NAME})
-    tempPortfolio[CATEGORY] = tempPortfolio[NAME].apply(lambda x: mapCategory(x))
+    tempPortfolio[CATEGORY] = tempPortfolio[NAME].apply(lambda x: mapAllocationCategory(x))
     tempPortfolio[SUBCATEGORY] = tempPortfolio[NAME]
     tempPortfolio.to_csv('test/2.csv')
     tempPortfolio = pd.pivot_table(tempPortfolio, values=[VALUE], index=[NAME, CATEGORY, SUBCATEGORY, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
@@ -132,93 +429,7 @@ def processPortfolio(portfolio, prices, function, valueColumn):
     return tempPortfolio
 
 
-def getExchange(df):
-    prices = pd.read_csv('data/data_prices.csv')
-    df[DATE] = dt.datetime.strptime(str(df[DATE]),'%d/%m/%Y')#.date())
-    df[DATE] = dt.datetime(df[DATE].year, df[DATE].month, 1)
-    return prices[prices[TICKER] == df[TICKER]][(df[DATE]- dt.timedelta(days=1)).strftime('%d/%m/%Y')].item()
-
-
 # =============== MAIN =============== #
-def computePortfolioIncome(portfolio, filterRemove):
-    # portfolio = read('data/data_portfolio_.csv', filterRemove)
-    portfolio[DATE] = portfolio[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
-    prices = pd.read_csv('data/data_prices.csv')
-
-    portfolio = portfolio.apply(lambda x : computeIncome(x, prices), axis=1)
-    months = list(prices.columns)
-    months.pop(0)
-    cols = prices.columns.tolist()
-    cols.insert(1, ACCOUNT)
-    portfolioIncome = pd.melt(
-        portfolio[cols], 
-        id_vars=[TICKER, ACCOUNT], 
-        value_vars=months,
-        var_name=DATE, 
-        value_name=VALUE
-    )
-    portfolioIncome = portfolioIncome.rename(columns={TICKER: NAME})
-    # portfolioIncome[ACCOUNT] = ~portfolioIncome[NAME].apply(lambda x: mapAccounts(x))
-    portfolioIncome[CATEGORY] = INVESTMENTS
-    portfolioIncome[SUBCATEGORY] = portfolioIncome[NAME]
-    # print(portfolioIncome[(portfolioIncome[NAME] == 'IRDM11') & (portfolioIncome[ACCOUNT] == 'Easy') & (portfolioIncome[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y')) >= dt.datetime.strptime('01/09/2021', '%d/%m/%Y'))])
-    # test = pd.pivot_table(portfolioIncome, values=[VALUE], index=[NAME, ACCOUNT, CATEGORY, SUBCATEGORY, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
-
-    return portfolioIncome[portfolioIncome[VALUE] != 0]
-
-
-def makePortfolio(df, filterRemove):
-    port = df[[VALUE, DATE, ACCOUNT, CURRENCY]].copy()
-    port[TICKER] = port[CURRENCY]
-    port[BUY] = port.apply(getExchange, axis=1)
-    port[SHARES] = port[VALUE]
-    port[BUY_TAX] = 0
-    port = port[[TICKER, ACCOUNT, BUY, SHARES, DATE]].copy()
-    port = computePortfolioIncome(port, filterRemove)
-
-
-def readData(filterRemove):
-    # income
-    income = read('data/data_income.csv', filterRemove)
-
-    portfolioBuy = read('data/data_portfolio_buy.csv', filterRemove)
-    portfolioBuy = computePortfolioIncome(portfolioBuy, filterRemove)
-    
-    portfolioSell = read('data/data_portfolio_sell.csv', filterRemove)
-    portfolioSell = computePortfolioIncome(portfolioSell, filterRemove)
-    portfolioSell[VALUE] = -portfolioSell[VALUE]
-    
-    income = pd.concat([income, portfolioBuy, portfolioSell])
-
-    income[CATEGORY] = income[CATEGORY].fillna('')
-    income[SUBCATEGORY] = income[SUBCATEGORY].fillna('')
-    income[DATE] = income[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
-    income[DATE] = date_trunc(income[DATE], 'month')
-    income = pd.pivot_table(income, values=[VALUE], index=[ACCOUNT, CATEGORY, SUBCATEGORY, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
-    income = income.rename(columns={VALUE: INCOME})
-
-    # expenses
-    expenses = read('data/data_expenses.csv', filterRemove)
-    expenses[CATEGORY] = expenses[CATEGORY].fillna('')
-    expenses[SUBCATEGORY] = expenses[SUBCATEGORY].fillna('')
-    expenses[DATE] = expenses[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
-    expenses[DATE] = date_trunc(expenses[DATE], 'month')
-    expenses = pd.pivot_table(expenses, values=[VALUE], index=[ACCOUNT, CATEGORY, SUBCATEGORY, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
-    expenses = expenses.rename(columns={VALUE: EXPENSES})
-
-
-    # tranfers
-    transfer = read('data/data_transf.csv', filterRemove)
-    transfer[DATE] = transfer[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
-    transfer[DATE] = date_trunc(transfer[DATE], 'month')
-    transferOut = pd.pivot_table(transfer, values=[VALUE], index=[FROM, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
-    transferIn = pd.pivot_table(transfer, values=[VALUE], index=[TO, DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
-
-    transferOut = transferOut.rename(columns={FROM: ACCOUNT})
-    transferIn = transferIn.rename(columns={TO: ACCOUNT})
-
-    return income, expenses, transferOut, transferIn
-
 
 def readNU():
     # income
@@ -232,7 +443,6 @@ def readNU():
     flexIncome[DATE] = flexIncome[DATE].apply(lambda x : getFlexDate(x))
     flexIncome[DATE] = date_trunc(flexIncome[DATE], 'month')
 
-    # print(income[income[DATE] < dt.datetime.strptime(str('01/11/2019'),'%d/%m/%Y')])
     income[DATE] = date_trunc(income[DATE], 'month')
     income = pd.pivot_table(income, values=[VALUE], index=[DATE], aggfunc={VALUE: np.sum}, fill_value=0).reset_index()
     income = income.rename(columns={VALUE: INCOME})
@@ -336,41 +546,6 @@ def readPortfolio():
 
 
     return portfolio
-
-
-def validateData(income, expenses, transferOut, transferIn, date):
-    filterDate = dt.datetime.strptime(str(date),'%d/%m/%Y')#.date()
-
-    income = income[income[DATE] <= filterDate]
-    expenses = expenses[expenses[DATE] <= filterDate]
-    transferOut = transferOut[transferOut[DATE] <= filterDate]
-    transferIn = transferIn[transferIn[DATE] <= filterDate]
-
-    income = pd.pivot_table(income, values=[INCOME], index=[ACCOUNT], aggfunc={INCOME: np.sum}, fill_value=0)#.reset_index()
-    expenses = pd.pivot_table(expenses, values=[EXPENSES], index=[ACCOUNT], aggfunc={EXPENSES: np.sum}, fill_value=0)#.reset_index()
-    transferOut = pd.pivot_table(transferOut, values=[VALUE], index=[ACCOUNT], aggfunc={VALUE: np.sum}, fill_value=0)#.reset_index()
-    transferIn = pd.pivot_table(transferIn, values=[VALUE], index=[ACCOUNT], aggfunc={VALUE: np.sum}, fill_value=0)#.reset_index()
-
-    transferOut = transferOut.rename(columns={VALUE: 'Out'})
-    transferIn = transferIn.rename(columns={VALUE: 'In'})
-
-    df = income.join(expenses).join(transferOut).join(transferIn)
-    df = df.fillna(0)
-    
-    df[VALUE] = df[INCOME] - df[EXPENSES] - df['Out'] + df['In']
-
-    balances = pd.read_csv('data/data_balances.csv')
-    balances[DATE] = balances[DATE].apply(lambda x : dt.datetime.strptime(str(x),'%d/%m/%Y'))#.date())
-    balances = balances[balances[DATE] == filterDate].set_index(ACCOUNT)
-    diff = balances[VALUE] - df[VALUE]
-    diff = diff.fillna(0)
-    diff = diff.apply(lambda x: round(x, 2))
-    if diff.sum() == 0 and balances.size != 0:
-        return True
-    else:
-        print(df)
-        print(diff)
-        return False
 
 
 if __name__ == '__main__':
