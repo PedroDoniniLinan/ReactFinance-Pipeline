@@ -31,13 +31,13 @@ def calculateBalance(df, c, k, groupBy, balanceType):
     return df, port
 
 
-def readData(currency, filterRemove):
+def readData(currency, truncate, filterRemove):
     # income
-    income = readFlow('income', currency, [CATEGORY, SUBCATEGORY], True, [ACCOUNT, CATEGORY, SUBCATEGORY, DATE], filterRemove)
+    income = readFlow('income', currency, [CATEGORY, SUBCATEGORY], truncate, [ACCOUNT, CATEGORY, SUBCATEGORY, DATE], filterRemove)
     income = income.rename(columns={VALUE: INCOME})
 
     # exchange
-    exchange = readFlow('exchange', None, [], True, None, filterRemove)
+    exchange = readFlow('exchange', None, [], truncate, None, filterRemove)
     exIn = exchange.apply(lambda x: pd.Series([x[TICKER], x[SHARES], x[DATE], x[ACCOUNT]], index=[TICKER, VALUE, DATE, ACCOUNT]) if x[TYPE] == PURCHASE else pd.Series([x[CURRENCY], x[BUY] * x[SHARES], x[DATE], x[ACCOUNT]], index=[TICKER, VALUE, DATE, ACCOUNT]), axis=1)
     exOut = exchange.apply(lambda x: pd.Series([x[CURRENCY], -(x[BUY]*x[SHARES]), x[DATE], x[ACCOUNT]], index=[TICKER, VALUE, DATE, ACCOUNT])  if x[TYPE] == PURCHASE else pd.Series([x[TICKER], -x[SHARES], x[DATE], x[ACCOUNT]], index=[TICKER, VALUE, DATE, ACCOUNT]), axis=1)
     exchange = pd.concat([exIn, exOut])
@@ -45,12 +45,12 @@ def readData(currency, filterRemove):
     exchange = exchange.rename(columns={VALUE: EXCHANGE})
 
     # expenses
-    expenses = readFlow('expenses', currency, [CATEGORY, SUBCATEGORY], True, [ACCOUNT, CATEGORY, SUBCATEGORY, DATE], filterRemove)
+    expenses = readFlow('expenses', currency, [CATEGORY, SUBCATEGORY], truncate, [ACCOUNT, CATEGORY, SUBCATEGORY, DATE], filterRemove)
     expenses = expenses.rename(columns={VALUE: EXPENSES})
 
     # tranfers
-    transferOut = readFlow('transf', currency, [], True, [FROM, DATE], filterRemove)
-    transferIn = readFlow('transf', currency, [], True, [TO, DATE], filterRemove)
+    transferOut = readFlow('transf', currency, [], truncate, [FROM, DATE], filterRemove)
+    transferIn = readFlow('transf', currency, [], truncate, [TO, DATE], filterRemove)
     transferOut = transferOut.rename(columns={FROM: ACCOUNT})
     transferIn = transferIn.rename(columns={TO: ACCOUNT})
     transferOut = transferOut.rename(columns={VALUE: OUT})
@@ -308,16 +308,18 @@ def filterAggregateBalances(dfList, date):
         joinedDf = df if joinedDf.empty else joinedDf.join(df, how="outer")
         joinedDf = joinedDf.fillna(0)
 
-        if not(VALUE in joinedDf.columns):
-            if count == 0 or count == 3 or count == 4:
-                joinedDf[VALUE] = joinedDf[COLS[count]]
+        try:
+            if not(VALUE in joinedDf.columns):
+                if count == 0 or count == 3 or count == 4:
+                    joinedDf[VALUE] = joinedDf[COLS[count]]
+                else:
+                    joinedDf[VALUE] = -joinedDf[COLS[count]]
+            elif count == 3 or count == 4:
+                joinedDf[VALUE] += joinedDf[COLS[count]]
             else:
-                joinedDf[VALUE] = -joinedDf[COLS[count]]
-        elif count == 3 or count == 4:
-            joinedDf[VALUE] += joinedDf[COLS[count]]
-        else:
-            joinedDf[VALUE] -= joinedDf[COLS[count]]
-
+                joinedDf[VALUE] -= joinedDf[COLS[count]]
+        except:
+            count += 1
 
     return joinedDf
 
@@ -344,8 +346,50 @@ def validateData(dict, currency, date, printMsg):
 
 
 # =============== ALLOCATION =============== #        
+def readAllocation(currency):
+    print(currency)
+    dfAlloc = pd.DataFrame({TICKER: [], DATE: [], POSITION: [], FLEX_POSITION: [], FLEX_INCOME: []})
+    dfList = readData(currency, truncate=False, filterRemove=True)
+    minDate = None
+    maxDate = None
+    for df in dfList:
+        if df.empty:
+            continue
+        minDate = df[DATE].min() if minDate is None else min(minDate, df[DATE].min())
+        maxDate = df[DATE].max() if maxDate is None else max(maxDate, df[DATE].max())
+    minDate = dt.datetime(minDate.year, minDate.month, 1)
+    maxDate = dt.datetime(maxDate.year, maxDate.month, 1)        
+    dates = generateDates(minDate, maxDate)
+    for df in dfList:
+        df[DATE] = date_trunc(df[DATE])
+    for d in dates:
+        df = filterAggregateBalances(dfList, d.strftime('%d/%m/%Y'))
+        if d.strftime('%d/%m/%Y') == '01/12/2021':
+            df[VALUE] = df[VALUE].apply(lambda x: round(x, 6))
+            print(df)
+        if currency == 'BRL':
+            dfAlloc.loc[-1] = ['Fixed income (BRL)', d, df[df.index == 'Nu'][VALUE].sum(), None, None]
+            dfAlloc = dfAlloc.reset_index(drop=True)
+            dfAlloc.loc[-1] = [currency, d, df[df.index != 'Nu'][VALUE].sum(), None, None]
+            dfAlloc = dfAlloc.reset_index(drop=True)
+        else:
+            dfAlloc.loc[-1] = [currency, d, df[VALUE].sum(), None, None]
+            dfAlloc = dfAlloc.reset_index(drop=True)
+    return dfAlloc
+        
+
 
 # =============== OTHER =============== #        
+def generateDates(start, end):
+    dates = []
+    while True:
+        dates.append(start)
+        start = getNextMonth(start)
+        if start > end:
+            break
+    return dates        
+
+
 def getFlexDate(date):
     if date.day >= DATE_TRESHOLD:
         date = date.replace(day=1, month=date.month + 1 if date.month < 12 else 1, year=date.year if date.month < 12 else date.year + 1)
