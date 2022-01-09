@@ -42,3 +42,8 @@ def getActives():
 
 def prinT(text):
     print('--------------- ' + text + ' ---------------')
+
+
+def printIf(msg, condition):
+    if condition:
+        print(msg)

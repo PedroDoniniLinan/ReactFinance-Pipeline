@@ -296,14 +296,19 @@ def truncGroup(df, truncate, groupBy):
 
 
 # =============== VALIDATION =============== #
-def filterAggregateBalances(dfList, date):
+def filterAggregateBalances(dfList, date, debug=False):
     filterDate = dt.datetime.strptime(str(date),'%d/%m/%Y')#.date()
 
     joinedDf = pd.DataFrame({'A' : []})
     for count, df in enumerate(dfList):
         if df.empty:
             continue
+        if debug:
+            print(df)
+            print(filterDate)
         df = df[df[DATE] <= filterDate]
+        if debug:
+            print(df)
         df = pd.pivot_table(df, values=[COLS[count]], index=[ACCOUNT], aggfunc={COLS[count]: np.sum}, fill_value=0)#.reset_index()
         joinedDf = df if joinedDf.empty else joinedDf.join(df, how="outer")
         joinedDf = joinedDf.fillna(0)
@@ -360,20 +365,26 @@ def readAllocation(currency):
     minDate = dt.datetime(minDate.year, minDate.month, 1)
     maxDate = dt.datetime(maxDate.year, maxDate.month, 1)        
     dates = generateDates(minDate, maxDate)
+    dfListFlex = []
     for df in dfList:
+        dfListFlex.append(df.copy())
         df[DATE] = date_trunc(df[DATE])
+    for df in dfListFlex:
+        df[DATE] = date_trunc(df[DATE].apply(lambda x: getFlexDate(x)))
+    print(dfListFlex[0])
     for d in dates:
         df = filterAggregateBalances(dfList, d.strftime('%d/%m/%Y'))
-        if d.strftime('%d/%m/%Y') == '01/12/2021':
-            df[VALUE] = df[VALUE].apply(lambda x: round(x, 6))
-            print(df)
+        dfFlex = filterAggregateBalances(dfListFlex, d.strftime('%d/%m/%Y'))
+        # if d.strftime('%d/%m/%Y') == '01/12/2021':
+        #     df[VALUE] = df[VALUE].apply(lambda x: round(x, 6))
+        #     print(df)
         if currency == 'BRL':
-            dfAlloc.loc[-1] = ['Fixed income (BRL)', d, df[df.index == 'Nu'][VALUE].sum(), None, None]
+            dfAlloc.loc[-1] = ['Fixed income (BRL)', d, df[df.index == 'Nu'][VALUE].sum(), dfFlex[dfFlex.index == 'Nu'][VALUE].sum() if not dfFlex.empty else 0, None]
             dfAlloc = dfAlloc.reset_index(drop=True)
-            dfAlloc.loc[-1] = [currency, d, df[df.index != 'Nu'][VALUE].sum(), None, None]
+            dfAlloc.loc[-1] = [currency, d, df[df.index != 'Nu'][VALUE].sum(), dfFlex[dfFlex.index != 'Nu'][VALUE].sum() if not dfFlex.empty else 0, None]
             dfAlloc = dfAlloc.reset_index(drop=True)
         else:
-            dfAlloc.loc[-1] = [currency, d, df[VALUE].sum(), None, None]
+            dfAlloc.loc[-1] = [currency, d, df[VALUE].sum(), dfFlex[VALUE].sum() if not dfFlex.empty else 0, None]
             dfAlloc = dfAlloc.reset_index(drop=True)
     return dfAlloc
         
